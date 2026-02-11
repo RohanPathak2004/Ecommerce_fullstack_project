@@ -4,6 +4,7 @@ import ProductCard from "../components/ProductCard.jsx";
 import {useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import {toast, ToastContainer} from "react-toastify";
+import {useProductContext} from "../context/ProductContext.jsx";
 
 const UpdateProduct = ({setUpdateNotification}) => {
     const id = useLocation().state;
@@ -20,7 +21,9 @@ const UpdateProduct = ({setUpdateNotification}) => {
         releaseDate: "",
         stockQuantity: ""
     });
-    console.log(id);
+
+    const {updateProductMutation} = useProductContext();
+
     const notify  = ()=>toast("Updated Product!!")
     const fetchProduct = async (id) => {
         const res = await axios.get(`http://localhost:8080/api/product/${id}`).then(res => res.data);
@@ -62,19 +65,9 @@ const UpdateProduct = ({setUpdateNotification}) => {
         submittedProduct.imageFile = image;
         console.log(submittedProduct);
         try{
-            const res = await axios.put(`http://localhost:8080/api/product/${id}`, submittedProduct, {
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                }
-            })
-            if(res.status===200){
-                notify();
-            }
-        } catch(error){
-            toast.error("Product Can't Be Updated Due To Some Error")
-        }finally {
-            setTimeout(()=>{navigate('/');},2000);
-
+            await updateProductMutation({id:id, submittedProduct:submittedProduct});
+        }catch (error){
+            console.log(error);
         }
 
     }

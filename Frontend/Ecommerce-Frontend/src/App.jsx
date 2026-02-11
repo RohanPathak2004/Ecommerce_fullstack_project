@@ -12,6 +12,7 @@ import {useEffect, useState} from "react";
 import {toast, ToastContainer} from "react-toastify";
 import {Provider} from "react-redux";
 import {ProductProvider} from "./context/ProductContext.jsx";
+import {cartProvider} from "./context/CartContext.jsx";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +44,7 @@ function App() {
     return (
         <>
             <QueryClientProvider client={queryClient}>
-                <ContextComposer providers={[ProductProvider]}>
+                <ContextComposer providers={[ProductProvider,cartProvider]}>
                 <NavigationBar/>
                 <ToastContainer/>
                 <Routes>

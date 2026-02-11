@@ -1,7 +1,6 @@
 import React, {useState} from 'react'
 import {toast, ToastContainer} from "react-toastify";
-import axios from "axios";
-import {useNavigate} from "react-router";
+import {useProductContext} from "../context/ProductContext.jsx";
 
 const AddProduct = () => {
     const [product, setProduct] = useState(
@@ -16,11 +15,11 @@ const AddProduct = () => {
             releaseDate: "",
             stockQuantity: ""
 
-        })
-
+        });
+    const {addProductMutation} = useProductContext();
     const [image,setImage] = useState();
     const [imageUploaded, setImageUploaded] = useState(false);
-    const navigate = useNavigate();
+
     const onChangeHandler = (e) => {
         const {name, value} = e.target //get the name attribute from the html and value
         setProduct({
@@ -28,15 +27,10 @@ const AddProduct = () => {
             [name]: value //[name], [ ] is used for dynamically finding the actual obj property name
         })
     }
-
     const onChangeImageHandler = (file) => {
         setImageUploaded(true)
         setImage(file);
     }
-
-
-
-
     const handleFormSubmission = async (e) => {
         e.preventDefault();
         const submittedProduct = {"product": {}, "imageFile": ""};
@@ -44,22 +38,12 @@ const AddProduct = () => {
         submittedProduct.imageFile = image;
         console.log(product);
         try{
-            const res = await axios.post('http://localhost:8080/api/product', submittedProduct, {
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                }
-            })
-            if(res.status===200){
-                toast.success("Product Added Successfully");
-            }
-        } catch(error){
-            toast.error("Product Can't Be Added Due To Some Error")
-        }finally {
-            setTimeout(()=>{navigate('/');},2000);
-
+            await addProductMutation(submittedProduct);
+        }catch (e) {
+            console.log(e.message());
         }
-
     }
+
 
     return (
         <div>

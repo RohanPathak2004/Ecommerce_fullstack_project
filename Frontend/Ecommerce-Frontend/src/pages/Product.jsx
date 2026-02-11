@@ -3,35 +3,23 @@ import {Link, useLocation, useNavigate} from "react-router";
 import noimage from "../assets/noimage.png";
 import {ToastContainer, toast} from 'react-toastify';
 import axios from "axios";
+import {useProductContext} from "../context/ProductContext.jsx";
+import {useCartContext} from "../context/CartContext.jsx";
 
 const Product = ({setAddedToCart}) => {
     const location = useLocation();
     const product = location.state
     const [askClientForDeletion, setAskClientForDeletion] = useState(false);
     const navigate = useNavigate();
-
+    const {deleteProductMutation} = useProductContext();
+    const {addProductToCart} = useCartContext();
     const handleProductDeletion = async () => {
         if (askClientForDeletion) {
-
-            const res = await axios.delete(`http://localhost:8080/api/product/${product.id}`)
-                .then(res => {
-                    if (res.status === 200) {
-
-                            toast.success("Product Deleted Successfully");
-
-
-                    }
-                }).catch((error)=>{
-
-                        toast.error("Error occurred during deletion process");
-
-
-                }).finally(()=>{
-                    setTimeout(()=>{
-                        navigate('/');
-                    },1000);
-                })
-
+            try {
+                await deleteProductMutation(product.id);
+            }catch (e) {
+                console.log(e.message());
+            }
         }
     }
 
@@ -108,8 +96,14 @@ const Product = ({setAddedToCart}) => {
 
                     <div className="flex flex-col gap-3 mt-4">
                         <button
-                            disabled={!product.productAvailable}
-                            onClick={() => setAddedToCart(prev => prev + 1)}
+                            disabled={!product.productAvailable||product.stockQuantity===0}
+                            onClick={()=>{
+                                toast("Product Added To Cart");
+                                addProductToCart({
+                                    productId:product.id,
+                                    quantity:1
+                                })
+                            }}
                             className="w-full md:w-2/3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-colors"
                         >
                             Add to Cart
