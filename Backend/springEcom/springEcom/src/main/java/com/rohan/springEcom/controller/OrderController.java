@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -22,9 +24,17 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping("/orders/place")
-    public ResponseEntity<OrderResponse> placeOrder(@RequestBody OrderRequest orderRequest){
-        OrderResponse orderResponse = orderService.placeOrder(orderRequest);
-        return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
+    public ResponseEntity<?> placeOrder(@RequestBody OrderRequest orderRequest){
+        try{
+            OrderResponse orderResponse = orderService.placeOrder(orderRequest);
+            return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
+        } catch (Exception e) {
+            Map<String,String> errorMessage = new HashMap<>();
+            errorMessage.put("message",e.getMessage());
+            return new ResponseEntity<>(errorMessage,HttpStatus.CONFLICT);
+        }
+
+
     }
 
     @GetMapping("/orders")

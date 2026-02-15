@@ -27,7 +27,7 @@ public class OrderService {
     ProductRepo productRepo;
     @Autowired
     OrderRepo orderRepo;
-    public OrderResponse placeOrder(OrderRequest orderRequest){
+    public OrderResponse placeOrder(OrderRequest orderRequest) throws Exception {
         Order order = new Order();
         String orderId ="ODR"+ UUID.randomUUID().toString().substring(0,8).toUpperCase();
         order.setOrderId(orderId);
@@ -42,6 +42,9 @@ public class OrderService {
 
             Product product = productRepo.findById(orderItemRequest.productId()).orElseThrow(()-> new RuntimeException("Product Not Found"));
             int quantity = orderItemRequest.quantity();
+            if(quantity>product.getStockQuantity()){
+                throw new Exception("Stock is limited for the "+product.getName());
+            }
             product.setStockQuantity(product.getStockQuantity()-quantity);
             BigDecimal totalPrice = product.getPrice().multiply(BigDecimal.valueOf(quantity));
             OrderItem item = OrderItem.builder()
